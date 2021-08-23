@@ -108,7 +108,7 @@ class Question(models.Model):
     question_text = models.CharField(max_length=150)
     # question grade/mark
     mark = models.IntegerField(default=0)
-    courses = models.OneToManyField(Course)
+    courses = models.ManyToManyField(Course)
     
     # <HINT> A sample model method to calculate if learner get the score of the question
     def is_get_score(self, selected_ids):

@@ -133,7 +133,7 @@ def submit(request, course_id):
                 viewname='onlinecourse:enroll',
                 args=(course.id,)
                 ))
-        else:
+         else:
 
             # Redirect to show_exam_result with the submission id
             return redirect('onlinecourse:login')
