@@ -114,15 +114,31 @@ def submit(request, course_id):
          # Get user and course object, then get the associated enrollment object created when the user enrolled the course
          course = get_object_or_404(Course, pk=course_id)
          user = request.user 
-         enrollment = Enrollment.objects.get(user=user, course=course)
-         # Create a submission object referring to the enrollment
-         submission = Submission.objects.create(Enrollment=enrollment,mode='honor')
-         # Collect the selected choices from exam form
-         answers = extract_answers(request)
+         is_enrolled = check_if_enrolled(user, course)
+         if user.is_authenticated:
+            if is_enrolled:
+                enrollment = Enrollment.objects.get(user=user, course=course)
+                # Create a submission object referring to the enrollment
+                submission = Submission.objects.create(Enrollment=enrollment,mode='honor')
+                # Collect the selected choices from exam form
+                answers = extract_answers(request)
+                submission.choices.add(answers)         
+            
+                return HttpResponseRedirect(reverse(
+                viewname='onlinecourse:show_exam_result',
+                args=(course.id, submission.id,)
+                ))
+            else:
+                return HttpResponseRedirect(reverse(
+                viewname='onlinecourse:enroll',
+                args=(course.id,)
+                ))
+        else:
 
-         # Add each selected choice object to the submission object
+            # Redirect to show_exam_result with the submission id
+            return redirect('onlinecourse:login')
 
-         # Redirect to show_exam_result with the submission id
+         
 
 # <HINT> A example method to collect the selected choices from the exam form from the request object
 def extract_answers(request):
@@ -142,6 +158,18 @@ def extract_answers(request):
         # For each selected choice, check if it is a correct answer or not
         # Calculate the total score
 def show_exam_result(request, course_id, submission_id):
-
+    course = get_object_or_404(Course, pk=course_id)
+    submission = get_object_or_404(Submission, pk=submission_id)
+    choices = submission.choices.all()
+    total_mark, mark = 0, 0
+    for question in course.question_set.all():
+        total_mark += question.mark
+        if question.is_get_score(choices):
+            mark += question.mark
+    
+    return HttpResponseRedirect(reverse(
+                viewname='onlinecourse:exam_result_bootstrap',
+                args=(course, choices,int(mark / total_mark * 100))
+                ))
 
 
