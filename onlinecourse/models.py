@@ -108,7 +108,7 @@ class Question(models.Model):
     question_text = models.CharField(max_length=150)
     # question grade/mark
     mark = models.IntegerField(default=0)
-    courses = models.ManyToManyField(Course)
+    
     
     # <HINT> A sample model method to calculate if learner get the score of the question
     def is_get_score(self, selected_ids):
@@ -129,7 +129,7 @@ class Question(models.Model):
 class Choice(models.Model):
     choice_text = models.CharField(max_length=150)    
     is_correct = models.BooleanField()
-    questions = models.ManyToManyField(Question)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
 # <HINT> The submission model
 # One enrollment could have multiple submission
